@@ -95,6 +95,90 @@ spec:
           configMap:
             name: {{ tpl .Values.proxy.configuration.logback.existingConfigmap . }}
       {{- end }}
+        {{- with .Values.configuration.tls }}
+        {{- if .keystore.existingSecret }}
+        - name: graphdb-connector-keystore
+          secret:
+            secretName: {{ .keystore.existingSecret }}
+            items:
+              - key: {{ .keystore.keystoreKey }}
+                path: connector-keystore.jks
+        {{- end }}
+        {{- if .truststore.existingSecret }}
+        - name: graphdb-connector-truststore
+          secret:
+            secretName: {{ .truststore.existingSecret }}
+            items:
+              - key: {{ .truststore.truststoreKey }}
+                path: connector-truststore.jks
+        {{- end }}
+        {{- if .certificateRevocationList.existingSecret }}
+        - name: graphdb-connector-certificate-revocation-list
+          secret:
+            secretName: {{ .certificateRevocationList.existingSecret }}
+            items:
+              - key: {{ .certificateRevocationList.certificateRevocationListKey }}
+                path: connector-certificate-revocation-list.pem
+        {{- end }}
+        {{- end }}
+        {{- with .Values.cluster.tls }}
+        {{- if .keystore.existingSecret }}
+        - name: graphdb-cluster-keystore
+          secret:
+            secretName: {{ .keystore.existingSecret }}
+            items:
+              - key: {{ .keystore.keystoreKey }}
+                path: cluster-keystore.jks
+        {{- end }}
+        {{- if .truststore.existingSecret }}
+        - name: graphdb-cluster-truststore
+          secret:
+            secretName: {{ .truststore.existingSecret }}
+            items:
+              - key: {{ .truststore.truststoreKey }}
+                path: cluster-truststore.jks
+        {{- end }}
+        {{- if .privateKey.existingSecret }}
+        - name: graphdb-cluster-private-key
+          secret:
+            secretName: {{ .privateKey.existingSecret }}
+            items:
+              - key: {{ .privateKey.privateKeyKey }}
+                path: cluster-private-key.pem
+        {{- end }}
+        {{- if .certificate.existingSecret }}
+        - name: graphdb-cluster-certificate
+          secret:
+            secretName: {{ .certificate.existingSecret }}
+            items:
+              - key: {{ .certificate.certificateKey }}
+                path: cluster-certificate.pem
+        {{- end }}
+        {{- if .certificateChain.existingSecret }}
+        - name: graphdb-cluster-certificate-chain
+          secret:
+            secretName: {{ .certificateChain.existingSecret }}
+            items:
+              - key: {{ .certificateChain.certificateChainKey }}
+                path: cluster-certificate-chain.pem
+        {{- end }}
+        {{- if .rootCerts.existingSecret }}
+        - name: graphdb-cluster-root-certs
+          secret:
+            secretName: {{ .rootCerts.existingSecret }}
+            items:
+              - key: {{ .rootCerts.rootCertsKey }}
+                path: cluster-root-certs.pem
+        {{- end }}
+        {{- if .certificateRevocationList.existingSecret }}
+        - name: graphdb-cluster-certificate-revocation-list
+          secret:
+            secretName: {{ .certificateRevocationList.existingSecret }}
+            items:
+              - key: {{ .certificateRevocationList.certificateRevocationListKey }}
+                path: cluster-certificate-revocation-list.pem
+        {{- end }}
+        {{- end }}
       {{- with .Values.proxy.extraVolumes }}
         {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
@@ -277,8 +361,48 @@ spec:
             {{- with .Values.proxy.extraEnvFrom }}
               {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
+          env:
+          {{- with .Values.configuration.tls }}
+          {{- if .keystore.existingSecret }}
+            - name: graphdb.connector.keystorePass
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .keystore.existingSecret }}
+                  key: {{ .keystore.keystorePasswordKey }}
+          {{- end }}
+          {{- if .truststore.existingSecret }}
+            - name: graphdb.connector.truststorePass
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .truststore.existingSecret }}
+                  key: {{ .truststore.truststorePasswordKey }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.cluster.tls }}
+          {{- if .keystore.existingSecret }}
+            - name: graphdb.raft.security.keystorePass
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .keystore.existingSecret }}
+                  key: {{ .keystore.keystorePasswordKey }}
+          {{- end }}
+          {{- if .truststore.existingSecret }}
+            - name: graphdb.raft.security.truststorePass
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .truststore.existingSecret }}
+                  key: {{ .truststore.truststorePasswordKey }}
+          {{- end }}
+          {{- if .privateKey.existingSecret }}
+            - name: graphdb.raft.security.certificateKeyPassword
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .privateKey.existingSecret }}
+                  key: {{ .privateKey.privateKeyPasswordKey }}
+          {{- end }}
+          {{- end }}
           {{- with .Values.proxy.extraEnv }}
-          env: {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- tpl (toYaml .) $ | nindent 12 }}
           {{- end }}
           ports:
             - name: http
@@ -295,6 +419,50 @@ spec:
             - name: graphdb-proxy-logback-config
               mountPath: /opt/graphdb/home/conf/logback.xml
               subPath: {{ .Values.proxy.configuration.logback.configmapKey }}
+            {{- end }}
+            {{- with .Values.configuration.tls }}
+            {{- if .keystore.existingSecret }}
+            - name: graphdb-connector-keystore
+              mountPath: /etc/graphdb/connector-keystore/
+            {{- end }}
+            {{- if .truststore.existingSecret }}
+            - name: graphdb-connector-truststore
+              mountPath: /etc/graphdb/connector-truststore/
+            {{- end }}
+            {{- if .certificateRevocationList.existingSecret }}
+            - name: graphdb-connector-certificate-revocation-list
+              mountPath: /etc/graphdb/connector-certificate-revocation-list/
+            {{- end }}
+            {{- end }}
+            {{- with .Values.cluster.tls }}
+            {{- if .keystore.existingSecret }}
+            - name: graphdb-cluster-keystore
+              mountPath: /etc/graphdb/cluster-keystore/
+            {{- end }}
+            {{- if .truststore.existingSecret }}
+            - name: graphdb-cluster-truststore
+              mountPath: /etc/graphdb/cluster-truststore/
+            {{- end }}
+            {{- if .privateKey.existingSecret }}
+            - name: graphdb-cluster-private-key
+              mountPath: /etc/graphdb/cluster-private-key/
+            {{- end }}
+            {{- if .certificate.existingSecret }}
+            - name: graphdb-cluster-certificate
+              mountPath: /etc/graphdb/cluster-certificate/
+            {{- end }}
+            {{- if .certificateChain.existingSecret }}
+            - name: graphdb-cluster-certificate-chain
+              mountPath: /etc/graphdb/cluster-certificate-chain/
+            {{- end }}
+            {{- if .rootCerts.existingSecret }}
+            - name: graphdb-cluster-root-certs
+              mountPath: /etc/graphdb/cluster-root-certs/
+            {{- end }}
+            {{- if .certificateRevocationList.existingSecret }}
+            - name: graphdb-cluster-certificate-revocation-list
+              mountPath: /etc/graphdb/cluster-certificate-revocation-list/
+            {{- end }}
             {{- end }}
             {{- with .Values.proxy.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}

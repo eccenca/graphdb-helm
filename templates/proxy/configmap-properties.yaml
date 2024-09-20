@@ -16,11 +16,61 @@ data:
     # See https://graphdb.ontotext.com/documentation/ for supported properties
     graphdb.connector.port={{ .Values.proxy.containerPorts.http }}
     graphdb.proxy.hosts={{ include "graphdb-proxy.cluster.nodes" . }}
+
+    {{- with .Values.configuration.tls }}
+    {{- if .keystore.existingSecret }}
+    graphdb.connector.SSLEnabled = true
+    graphdb.connector.scheme = https
+    graphdb.connector.secure = true
+    graphdb.connector.keystoreFile=/etc/graphdb/connector-keystore/connector-keystore.jks
+    graphdb.connector.keyAlias={{ .keystore.keyAlias }}
+    graphdb.connector.keystoreProvider={{ .keystore.keystoreProvider }}
+    graphdb.connector.keystoreType={{ .keystore.keystoreType }}
+    {{- end }}
+    {{- if .truststore.existingSecret }}
+    graphdb.connector.truststoreFile=/etc/graphdb/connector-truststore/connector-truststore.jks
+    graphdb.connector.truststoreProvider={{ .truststore.truststoreProvider }}
+    graphdb.connector.truststoreType={{ .truststore.truststoreType }}
+    {{- end }}
+    {{- if .certificateRevocationList.existingSecret}}
+    graphdb.connector.certificateRevocationListFile=/etc/graphdb/connector-certificate-revocation-list/connector-certificate-revocation-list.pem
+    {{- end }}
+    {{- end }}
+    {{- with .Values.cluster.tls }}
+    graphdb.raft.security.mode={{ .mode }}
+    {{- if .privateKey.existingSecret }}
+    graphdb.raft.security.certificateKeyFile=/etc/graphdb/cluster-private-key/cluster-private-key.pem
+    {{- end }}
+    {{- if .certificate.existingSecret }}
+    graphdb.raft.security.certificateFile=/etc/graphdb/cluster-certificate/cluster-certificate.pem
+    {{- end }}
+    {{- if .certificateChain.existingSecret }}
+    graphdb.raft.security.certificateChainFile=/etc/graphdb/cluster-certificate-chain/cluster-certificate-chain.pem
+    {{- end }}
+    {{- if .keystore.existingSecret }}
+    graphdb.raft.security.keystoreFile=/etc/graphdb/cluster-keystore/cluster-keystore.jks
+    graphdb.raft.security.keyAlias={{ .keystore.keyAlias }}
+    graphdb.raft.security.keystoreProvider={{ .keystore.keystoreProvider }}
+    graphdb.raft.security.keystoreType={{ .keystore.keystoreType }}
+    {{- end }}
+    {{- if .truststore.existingSecret }}
+    graphdb.raft.security.truststoreFile=/etc/graphdb/cluster-truststore/cluster-truststore.jks
+    graphdb.raft.security.truststoreProvider={{ .truststore.truststoreProvider }}
+    graphdb.raft.security.truststoreType={{ .truststore.truststoreType }}
+    {{- end }}
+    {{- if .rootCerts.existingSecret }}
+    graphdb.raft.security.rootCerts=/etc/graphdb/cluster-root-certs/cluster-root-certs.pem
+    {{- end }}
+    {{- if .certificateRevocationList.existingSecret }}
+    graphdb.raft.security.certificateRevocationListFile=/etc/graphdb/cluster-certificate-revocation-list/cluster-certificate-revocation-list.pem
+    {{- end }}
+    {{- end }}
+
     {{- if .Values.proxy.configuration.properties }}
     ##### Overrides from values.yaml #####
     {{- range $key, $val := .Values.proxy.configuration.properties -}}
     {{- if ne $val nil }}
-    {{ $key }}={{ tpl ($val | toString) $ | quote }}
+    {{ $key }}={{ tpl ($val | toString) $ }}
     {{- end }}
     {{- end -}}
     {{- end -}}
