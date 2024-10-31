@@ -135,7 +135,7 @@ function cloudBackup {
   local response=
   local response_status
   response=$(mktemp)
-  response_status=$(curl -X POST \
+  response_status=$(curl -k -X POST \
     -isSL \
     -o "${response}" \
     -w "Status=%{response_code}" \
@@ -143,7 +143,7 @@ function cloudBackup {
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --data-binary "${backup_options}" \
-    --url "http://${GRAPHDB_SERVICE_NAME}:${GRAPHDB_SERVICE_PORT}/rest/recovery/cloud-backup")
+    --url "${GRAPHDB_PROTOCOL}://${GRAPHDB_SERVICE_NAME}:${GRAPHDB_SERVICE_PORT}/rest/recovery/cloud-backup")
 
   if ! echo "${response_status}" | grep -q 'Status=200' ; then
     log "ERROR: Backup ${BACKUP_NAME} creation failed, response: ${response_status}"
@@ -168,7 +168,7 @@ function localBackup() {
   log "Creating local backup ${backup_path}"
 
   local response
-  response=$(curl -X POST \
+  response=$(curl -k -X POST \
     -sSL \
     -o "${backup_path}" \
     -w "Status=%{response_code}" \
@@ -176,7 +176,7 @@ function localBackup() {
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --data-binary "${backup_options}" \
-    --url "http://${GRAPHDB_SERVICE_NAME}:${GRAPHDB_SERVICE_PORT}/rest/recovery/backup")
+    --url "${GRAPHDB_PROTOCOL}://${GRAPHDB_SERVICE_NAME}:${GRAPHDB_SERVICE_PORT}/rest/recovery/backup")
 
   if ! echo "${response}" | grep -q 'Status=200' ; then
     log "ERROR: Backup ${BACKUP_NAME} creation failed, response: ${response}"

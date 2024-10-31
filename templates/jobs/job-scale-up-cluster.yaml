@@ -75,7 +75,7 @@ spec:
             - name: GRAPHDB_PROXY_SERVICE_PORT
               value: {{ .Values.proxy.headlessService.ports.http | quote }}
             - name: GRAPHDB_PROTOCOL
-              value: {{ ternary "https" "http" (ne .Values.configuration.tls.keystore.existingSecret "") }}
+              value: {{ include "graphdb.tomcat.protocol" . }}
             - name: GRAPHDB_AUTH_TOKEN
               valueFrom:
                 secretKeyRef:

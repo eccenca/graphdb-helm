@@ -14,12 +14,12 @@
   - Added `configuration.tls.certificateRevocationList` to configure a certificate revocation list
 - Added new configuration properties for configuring GraphDB cluster security (SSL/TLS)
   - Added `cluster.tls.mode` to configure cluster security mode
-  - Added `cluster.tls.privateKey` to configure a private key with its properties
-  - Added `cluster.tls.certificate` to configure a certificate
   - Added `cluster.tls.keystore` to configure a keystore with its properties
   - Added `cluster.tls.truststore` to configure a truststore with its properties
-  - Added `cluster.tls.rootCerts` to configure root certificates to be trusted
+  - Added `cluster.tls.certificate` to configure a certificate
   - Added `cluster.tls.certificateChain` to configure a certificate chain
+  - Added `cluster.tls.certificateKey` to configure a private key with its properties
+  - Added `cluster.tls.rootCerts` to configure root certificates to be trusted
   - Added `cluster.tls.certificateRevocationList` to configure a certificate revocation list
 - Updated jobs and scripts to use `https` or `http` depending on whether the Tomcat connector security is configured
 
