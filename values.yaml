@@ -499,6 +499,7 @@ headlessService:
 persistence:
   # Toggles the persistence of GraphDB data.
   # - If enabled, the StatefulSet will use a PVC template and rely on the CSI to dynamically provision Persistent Volumes.
+  # - If enabled, but the template is disabled, the StatefulSet will use a predefined Persistent Volumes, needed to create manually before.
   # - If disabled, it falls back to an emptyDir volume.
   enabled: true
 
@@ -506,6 +507,7 @@ persistence:
   # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#volume-claim-templates
   # Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
   volumeClaimTemplate:
+    enabled: true
     # Prefix used when naming the PVCs for the StatefulSet
     name: "storage"
     # Additional labels to add to the PVC template.
